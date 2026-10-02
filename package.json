@@ -1,0 +1,55 @@
+{
+  "name": "days-matter-desktop",
+  "version": "0.1.0",
+  "description": "电脑版倒数日应用 - 支持桌面小组件",
+  "main": "dist-electron/main/index.js",
+  "author": "Days Matter Desktop",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build:renderer": "vite build",
+    "build:electron": "electron-vite build",
+    "build:app": "npm run build:renderer && npm run build:electron",
+    "build": "npm run build:app && electron-builder",
+    "preview": "vite preview",
+    "electron:build": "npm run build:app && electron-builder"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "electron-store": "^8.2.0",
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  },
+  "build": {
+    "appId": "com.daysmatter.desktop",
+    "productName": "Days Matter Desktop",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "zip"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    }
+  }
+}

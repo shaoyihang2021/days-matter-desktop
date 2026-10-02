@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-electron/
+release/
+out/
+build/
+
+# electron-builder
+*.blockmap
+*.yml.bak
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# env
+.env
+.env.local
+.env.*.local
+
+# os
+.cache/
+.local/
+
+# test
+coverage/

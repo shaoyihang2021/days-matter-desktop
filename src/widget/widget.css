@@ -1,0 +1,226 @@
+/* 小组件样式 */
+.widget {
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 46, 0.92) 0%,
+    rgba(22, 33, 62, 0.92) 100%
+  );
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--accent-color, #6C5CE7)33 inset;
+  color: #e8e8f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent-color, #6C5CE7);
+  border-radius: 14px 0 0 14px;
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-right: 40px;
+}
+
+.drag-area {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.widget-icon {
+  font-size: 16px;
+}
+
+.widget-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(232, 232, 240, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cycle-hint {
+  font-size: 11px;
+  color: rgba(232, 232, 240, 0.5);
+}
+
+.widget-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.widget:hover .widget-controls {
+  opacity: 1;
+}
+
+.ctrl-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(232, 232, 240, 0.7);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.widget-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.widget-days {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.days-number {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent-color, #6C5CE7), #A29BFE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.days-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(232, 232, 240, 0.55);
+}
+
+.widget-meta {
+  font-size: 11px;
+  color: rgba(232, 232, 240, 0.45);
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+}
+
+.widget-time {
+  font-size: 12px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  color: var(--accent-color, #6C5CE7);
+  margin-top: 6px;
+  opacity: 0.85;
+}
+
+/* 空状态 */
+.widget-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(26, 26, 46, 0.9);
+  border-radius: 14px;
+  color: rgba(232, 232, 240, 0.5);
+  text-align: center;
+}
+
+.widget-empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.widget-empty-text {
+  font-size: 12px;
+}
+
+/* 小组件内设置 */
+.widget-settings {
+  position: absolute;
+  top: 32px;
+  right: 8px;
+  background: rgba(20, 20, 35, 0.95);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  font-size: 12px;
+  color: rgba(232, 232, 240, 0.8);
+}
+
+.mini-toggle {
+  width: 28px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.mini-toggle.on {
+  background: var(--accent-color, #6C5CE7);
+}
+
+.mini-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  transition: left 0.3s;
+}
+
+.mini-toggle.on::after {
+  left: 14px;
+}
