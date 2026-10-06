@@ -2,8 +2,7 @@ name: Build & Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
   workflow_dispatch:
 
 jobs:
@@ -22,33 +21,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-<<<<<<< Updated upstream
-          node-version: 20
-=======
           node-version: 22
->>>>>>> Stashed changes
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
-<<<<<<< Updated upstream
-        env:
-          ELECTRON_MIRROR: https://electronjs.org/archives/
-
-      - name: Build Electron app
-        run: npm run electron:build
-        env:
-          # macOS notarization (optional)
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-=======
 
       - name: Build & Package Electron app
         run: npm run electron:build
->>>>>>> Stashed changes
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -80,7 +60,5 @@ jobs:
         with:
           files: artifacts/**
           generate_release_notes: true
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
