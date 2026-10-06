@@ -29,6 +29,8 @@ jobs:
 
       - name: Build & Package Electron app
         run: npm run electron:build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
