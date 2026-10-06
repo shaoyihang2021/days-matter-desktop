@@ -33,6 +33,7 @@
   "build": {
     "appId": "com.daysmatter.desktop",
     "productName": "Days Matter Desktop",
+    "publish": null,
     "directories": {
       "output": "release"
     },
