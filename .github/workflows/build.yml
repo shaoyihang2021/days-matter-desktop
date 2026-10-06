@@ -44,11 +44,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clean up intermediate build artifacts
+        shell: bash
+        run: |
+          # 保留最终安装包，删除 unpacked 中间目录和无关文件
+          # 最终产物: *.exe, *.dmg, *.zip, *.AppImage, *.blockmap
+          echo "=== Before cleanup ==="
+          ls -la release/ 2>/dev/null | head -20
+
+          # 删除 unpacked 目录（中间打包产物）
+          rm -rf release/*-unpacked release/*-arm64 release/*-x64
+
+          # 删除无关文件（builder debug、Electron Framework 解包等）
+          find release/ -maxdepth 1 \
+            ! -name '*.exe' \
+            ! -name '*.dmg' \
+            ! -name '*.zip' \
+            ! -name '*.AppImage' \
+            ! -name '*.blockmap' \
+            -delete
+
+          echo "=== After cleanup ==="
+          ls -la release/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: days-matter-desktop-${{ matrix.os }}
-          path: release/*
+          path: release/*.{exe,dmg,zip,AppImage,blockmap}
           if-no-files-found: error
 
   release:
@@ -67,7 +90,7 @@ jobs:
           merge-multiple: true
 
       - name: Display structure of downloaded files
-        run: ls -la artifacts/
+        run: ls -lh artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
