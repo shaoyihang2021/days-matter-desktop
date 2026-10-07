@@ -1,5 +1,7 @@
 export type EventType = 'countdown' | 'countup' // 倒数 / 正计时
 
+export type ThemeMode = 'light' | 'dark' | 'auto'
+
 export interface DaysEvent {
   id: string
   title: string
@@ -7,7 +9,7 @@ export interface DaysEvent {
   time?: string // HH:mm (可选)
   type: EventType
   color: string // hex: #RRGGBB
-  icon?: string // emoji 图标
+  icon?: string
   note?: string
   repeat?: 'none' | 'yearly' | 'monthly'
   createdAt: number
@@ -18,13 +20,15 @@ export interface AppSettings {
   widgetOpacity: number // 0-100
   defaultColor: string
   showSecondaryInfo: boolean
+  theme: ThemeMode
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   launchAtLogin: false,
   widgetOpacity: 92,
-  defaultColor: '#6C5CE7',
+  defaultColor: '#64D2FF',
   showSecondaryInfo: true,
+  theme: 'auto',
 }
 
 export const DEFAULT_EVENTS: DaysEvent[] = [
@@ -33,8 +37,7 @@ export const DEFAULT_EVENTS: DaysEvent[] = [
     title: '新年元旦',
     date: `${new Date().getFullYear() + 1}-01-01`,
     type: 'countdown',
-    color: '#E17055',
-    icon: '🎊',
+    color: '#FF6B6B',
     repeat: 'yearly',
     createdAt: Date.now(),
   },
@@ -43,8 +46,7 @@ export const DEFAULT_EVENTS: DaysEvent[] = [
     title: '已活天数',
     date: '2000-01-01',
     type: 'countup',
-    color: '#00B894',
-    icon: '🌟',
+    color: '#30D158',
     createdAt: Date.now(),
   },
 ]
