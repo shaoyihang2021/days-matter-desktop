@@ -47,21 +47,21 @@ jobs:
       - name: Clean up intermediate build artifacts
         shell: bash
         run: |
-          # 保留最终安装包，删除 unpacked 中间目录和无关文件
-          # 最终产物: *.exe, *.dmg, *.zip, *.AppImage, *.blockmap
           echo "=== Before cleanup ==="
-          ls -la release/ 2>/dev/null | head -20
+          ls -la release/ | head -20
 
-          # 删除 unpacked 目录（中间打包产物）
+          # 1) 删 unpacked 中间目录
           rm -rf release/*-unpacked release/*-arm64 release/*-x64
 
-          # 删除无关文件（builder debug、Electron Framework 解包等）
-          find release/ -maxdepth 1 \
+          # 2) 删垃圾文件，保留最终安装包（+ -mindepth 1 不删根目录）
+          find release/ -maxdepth 1 -mindepth 1 \
             ! -name '*.exe' \
             ! -name '*.dmg' \
             ! -name '*.zip' \
             ! -name '*.AppImage' \
+            ! -name '*.deb' \
             ! -name '*.blockmap' \
+            ! -name '*.yml' \
             -delete
 
           echo "=== After cleanup ==="
@@ -71,7 +71,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: days-matter-desktop-${{ matrix.os }}
-          path: release/*.{exe,dmg,zip,AppImage,blockmap}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
           if-no-files-found: error
 
   release:
