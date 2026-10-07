@@ -1,6 +1,6 @@
 {
   "name": "days-matter-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "电脑版倒数日应用 - 支持桌面小组件",
   "main": "dist-electron/main/index.js",
   "author": "Days Matter Desktop <dev@daysmatter.local>",
@@ -56,9 +56,19 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb"
       ],
       "category": "Utility"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "倒数日"
     }
-  }
+  },
+  "productName": "倒数日"
 }
