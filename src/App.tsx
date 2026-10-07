@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { DaysEvent } from '@/types'
+import { useState, useEffect } from 'react'
+import { DaysEvent, AppSettings, ThemeMode } from '@/types'
 import { useEvents, useSettings } from '@/hooks/useEvents'
 import EventCard from '@/components/EventCard'
 import EventForm from '@/components/EventForm'
@@ -8,6 +8,14 @@ import './App.css'
 
 type Tab = 'events' | 'settings'
 
+function applyTheme(theme: ThemeMode) {
+  document.documentElement.dataset.theme = theme
+}
+
+const THEME_ORDER: ThemeMode[] = ['auto', 'light', 'dark']
+const THEME_LABEL: Record<ThemeMode, string> = { auto: '跟随', light: '浅色', dark: '深色' }
+const THEME_ICON: Record<ThemeMode, string> = { auto: '⌁', light: '☀︎', dark: '☾' }
+
 export default function App() {
   const { events, addEvent, updateEvent, deleteEvent } = useEvents()
   const { settings, updateSettings } = useSettings()
@@ -15,110 +23,71 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [editingEvent, setEditingEvent] = useState<DaysEvent | null>(null)
 
-  const handleAdd = () => {
-    setEditingEvent(null)
-    setShowForm(true)
-  }
+  useEffect(() => { applyTheme(settings.theme) }, [settings.theme])
 
-  const handleEdit = (event: DaysEvent) => {
-    setEditingEvent(event)
-    setShowForm(true)
-  }
-
-  const handleSubmit = (data: Omit<DaysEvent, 'id' | 'createdAt'>) => {
-    if (editingEvent) {
-      updateEvent(editingEvent.id, data)
-    } else {
-      addEvent(data)
-    }
-    setShowForm(false)
-    setEditingEvent(null)
-  }
-
-  const handleDelete = (id: string) => {
-    if (confirm('确定要删除这个事件吗？')) {
-      deleteEvent(id)
-    }
-  }
-
-  const handleShowWidget = async (event: DaysEvent) => {
-    if (window.electronAPI) {
-      await window.electronAPI.toggleWidget(true, event.id)
-    } else {
-      alert('请在 Electron 环境中运行以使用桌面小组件功能')
-    }
+  const nextTheme = () => {
+    const i = THEME_ORDER.indexOf(settings.theme)
+    updateSettings({ theme: THEME_ORDER[(i + 1) % THEME_ORDER.length] })
   }
 
   return (
     <div className="app">
-      {/* 标题栏 */}
       <header className="app-header">
         <div className="app-title">
-          <span className="logo">⏳</span>
-          <span>Days Matter Desktop</span>
+          <div className="logo">D</div>
+          <span>倒数日</span>
         </div>
         <div className="app-actions">
-          <button className="btn btn-primary" onClick={handleAdd}>
-            + 添加事件
+          <button className="btn btn-secondary" onClick={nextTheme}
+            title={`当前：${THEME_LABEL[settings.theme]} · 点击切换`}>
+            {THEME_ICON[settings.theme]} {THEME_LABEL[settings.theme]}
+          </button>
+          <button className="btn btn-primary" onClick={() => { setEditingEvent(null); setShowForm(true) }}>
+            ＋ 添加事件
           </button>
         </div>
       </header>
 
-      {/* Tab 切换 */}
       <nav className="app-tabs">
-        <button
-          className={`tab-btn ${tab === 'events' ? 'active' : ''}`}
-          onClick={() => setTab('events')}
-        >
-          📅 事件列表 ({events.length})
+        <button className={`tab-btn ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
+          事件列表 <span style={{ opacity: 0.55 }}>({events.length})</span>
         </button>
-        <button
-          className={`tab-btn ${tab === 'settings' ? 'active' : ''}`}
-          onClick={() => setTab('settings')}
-        >
-          ⚙️ 设置
+        <button className={`tab-btn ${tab === 'settings' ? 'active' : ''}`} onClick={() => setTab('settings')}>
+          设置
         </button>
       </nav>
 
-      {/* 主内容 */}
       <main className="app-main">
         {tab === 'events' && (
           <div className="events-grid">
             {events.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📭</div>
-                <p>还没有事件，点击上方按钮添加吧！</p>
+                <div className="empty-icon">D</div>
+                <p>还没有事件，点击上方按钮添加吧</p>
               </div>
-            ) : (
-              events.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onShowWidget={handleShowWidget}
-                />
-              ))
-            )}
+            ) : events.map(event => (
+              <EventCard key={event.id} event={event}
+                onEdit={(e) => { setEditingEvent(e); setShowForm(true) }}
+                onDelete={(id) => { if (confirm('确定删除这个事件吗？')) deleteEvent(id) }}
+                onShowWidget={async (e) => {
+                  if (window.electronAPI) await window.electronAPI.toggleWidget(true, e.id)
+                  else alert('请在应用环境中运行以使用桌面小组件')
+                }} />
+            ))}
           </div>
         )}
-
         {tab === 'settings' && (
           <SettingsPanel settings={settings} onUpdate={updateSettings} />
         )}
       </main>
 
-      {/* 添加/编辑弹窗 */}
       {showForm && (
-        <EventForm
-          initialEvent={editingEvent}
-          defaultColor={settings.defaultColor}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setShowForm(false)
-            setEditingEvent(null)
+        <EventForm initialEvent={editingEvent} defaultColor={settings.defaultColor}
+          onSubmit={(data) => {
+            editingEvent ? updateEvent(editingEvent.id, data) : addEvent(data)
+            setShowForm(false); setEditingEvent(null)
           }}
-        />
+          onCancel={() => { setShowForm(false); setEditingEvent(null) }} />
       )}
     </div>
   )
