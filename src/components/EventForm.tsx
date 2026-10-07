@@ -9,11 +9,9 @@ interface Props {
 }
 
 const COLORS = [
-  '#E17055', '#FDCB6E', '#00B894', '#0984E3', '#6C5CE7',
-  '#FD79A8', '#00CEC9', '#D63031', '#55EFC4', '#A29BFE',
+  '#FF6B6B', '#FF9F0A', '#FFD60A', '#30D158',
+  '#64D2FF', '#5E5CE6', '#BF5AF2', '#FF2D55',
 ]
-
-const EMOJIS = ['📅', '🎂', '🎉', '💍', '✈️', '🎓', '🎊', '🌟', '❤️', '🏆', '📖', '💼']
 
 export default function EventForm({ initialEvent, defaultColor, onSubmit, onCancel }: Props) {
   const [title, setTitle] = useState(initialEvent?.title || '')
@@ -21,14 +19,13 @@ export default function EventForm({ initialEvent, defaultColor, onSubmit, onCanc
   const [time, setTime] = useState(initialEvent?.time || '')
   const [type, setType] = useState<DaysEvent['type']>(initialEvent?.type || 'countdown')
   const [color, setColor] = useState(initialEvent?.color || defaultColor)
-  const [icon, setIcon] = useState(initialEvent?.icon || '📅')
   const [note, setNote] = useState(initialEvent?.note || '')
   const [repeat, setRepeat] = useState<DaysEvent['repeat']>(initialEvent?.repeat || 'none')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !date) return
-    onSubmit({ title: title.trim(), date, time: time || undefined, type, color, icon, note: note || undefined, repeat })
+    onSubmit({ title: title.trim(), date, time: time || undefined, type, color, note: note || undefined, repeat })
   }
 
   return (
@@ -38,48 +35,33 @@ export default function EventForm({ initialEvent, defaultColor, onSubmit, onCanc
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>标题 *</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="例如：生日、纪念日"
-              required
-              autoFocus
-            />
+            <label>标题</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+              placeholder="例如：生日、纪念日" required autoFocus />
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>日期 *</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
+              <label>日期</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
             </div>
             <div className="form-group">
               <label>时间（可选）</label>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-              />
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label>类型</label>
-              <select value={type} onChange={(e) => setType(e.target.value as DaysEvent['type'])}>
-                <option value="countdown">⏪ 倒数日（距离还有几天）</option>
-                <option value="countup">⏩ 正值日（已过了几天）</option>
+              <select value={type} onChange={e => setType(e.target.value as DaysEvent['type'])}>
+                <option value="countdown">倒数日（距离还有几天）</option>
+                <option value="countup">正值日（已过了几天）</option>
               </select>
             </div>
             <div className="form-group">
               <label>重复</label>
-              <select value={repeat} onChange={(e) => setRepeat(e.target.value as DaysEvent['repeat'])}>
+              <select value={repeat} onChange={e => setRepeat(e.target.value as DaysEvent['repeat'])}>
                 <option value="none">不重复</option>
                 <option value="yearly">每年重复</option>
                 <option value="monthly">每月重复</option>
@@ -90,50 +72,22 @@ export default function EventForm({ initialEvent, defaultColor, onSubmit, onCanc
           <div className="form-group">
             <label>颜色</label>
             <div className="color-picker-row">
-              {COLORS.map((c) => (
-                <div
-                  key={c}
-                  className={`color-swatch ${color === c ? 'active' : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setColor(c)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>图标</label>
-            <div className="color-picker-row">
-              {EMOJIS.map((e) => (
-                <div
-                  key={e}
-                  className={`color-swatch ${icon === e ? 'active' : ''}`}
-                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  onClick={() => setIcon(e)}
-                >
-                  {e}
-                </div>
+              {COLORS.map(c => (
+                <div key={c} className={`color-swatch ${color === c ? 'active' : ''}`}
+                  style={{ backgroundColor: c }} onClick={() => setColor(c)} />
               ))}
             </div>
           </div>
 
           <div className="form-group">
             <label>备注（可选）</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="写点什么..."
-            />
+            <input type="text" value={note} onChange={e => setNote(e.target.value)}
+              placeholder="写点什么..." />
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>
-              取消
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {initialEvent ? '保存' : '添加'}
-            </button>
+            <button type="button" className="btn btn-secondary" onClick={onCancel}>取消</button>
+            <button type="submit" className="btn btn-primary">{initialEvent ? '保存' : '添加'}</button>
           </div>
         </form>
       </div>
