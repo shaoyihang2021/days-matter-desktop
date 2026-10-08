@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, screen, shell, type NativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, screen, nativeTheme, shell, type NativeImage } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -9,6 +9,7 @@ let mainWindow: BrowserWindow | null = null
 let widgetWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 let currentWidgetEventId: string | null = null
+let widgetClickThrough = false  // 主进程维护穿透状态（避免死锁）
 
 const isDev = process.env.VITE_DEV_SERVER_URL !== undefined
 
@@ -18,7 +19,7 @@ function getIsDark(): boolean {
     if (settings.theme === 'dark') return true
     if (settings.theme === 'light') return false
   } catch {}
-  return screen.isAskForDisplay
+  return nativeTheme.shouldUseDarkColors  // 跟随系统
 }
 
 function createMainWindow() {
@@ -30,7 +31,7 @@ function createMainWindow() {
     minHeight: 520,
     title: '倒数日',
     backgroundColor: isDark ? '#1C1C1E' : '#F5F5F7',
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    frame: false,  // Windows-only：彻底自绘标题栏（无原生栏）
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -76,6 +77,17 @@ function createWidgetWindow() {
   return widgetWindow
 }
 
+function buildTrayMenu(): Menu {
+  return Menu.buildFromTemplate([
+    { label: '显示主界面', click: () => { if (!mainWindow) createMainWindow(); mainWindow?.show(); mainWindow?.focus() } },
+    { label: widgetWindow?.isVisible() ? '隐藏小组件' : '显示小组件', click: () => { if (!widgetWindow) createWidgetWindow(); else widgetWindow.isVisible() ? widgetWindow.hide() : widgetWindow.show() } },
+    // ↓ 关键：即使小组件设了穿透，托盘菜单永远能解锁（避免死锁）
+    { label: widgetClickThrough ? '🔓 解锁小组件点击' : '🔒 锁定小组件点击', click: () => { widgetClickThrough = !widgetClickThrough; widgetWindow?.setIgnoreMouseEvents(widgetClickThrough, { forward: true }); tray?.setContextMenu(buildTrayMenu()) } },
+    { type: 'separator' },
+    { label: '退出', click: () => app.quit() },
+  ])
+}
+
 function createTray() {
   const iconPath = path.join(__dirname, '../../resources/icon.png')
   let icon: NativeImage
@@ -83,16 +95,15 @@ function createTray() {
   catch { icon = nativeImage.createEmpty() }
   tray = new Tray(icon)
   tray.setToolTip('倒数日')
-  tray.setContextMenu(Menu.buildFromTemplate([
-    { label: '显示主界面', click: () => { if (!mainWindow) createMainWindow(); mainWindow?.show(); mainWindow?.focus() } },
-    { label: '显示/隐藏小组件', click: () => { if (!widgetWindow) createWidgetWindow(); else widgetWindow.isVisible() ? widgetWindow.hide() : widgetWindow.show() } },
-    { type: 'separator' },
-    { label: '退出', click: () => app.quit() },
-  ]))
+  tray.setContextMenu(buildTrayMenu())
   tray.on('click', () => { if (!mainWindow) createMainWindow(); mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show() })
 }
 
-function setWidgetClickThrough(enabled: boolean) { widgetWindow?.setIgnoreMouseEvents(enabled, { forward: true }) }
+function setWidgetClickThrough(enabled: boolean) {
+  widgetClickThrough = enabled
+  widgetWindow?.setIgnoreMouseEvents(enabled, { forward: true })
+  tray?.setContextMenu(buildTrayMenu())  // 刷新菜单文案
+}
 
 // IPC
 ipcMain.handle('widget:toggle', (_e, show: boolean, eventId?: string) => {
@@ -102,10 +113,13 @@ ipcMain.handle('widget:toggle', (_e, show: boolean, eventId?: string) => {
 })
 ipcMain.handle('widget:update-event', (_e, id: string) => { currentWidgetEventId = id; widgetWindow?.webContents.send('widget:update-event', id); return true })
 ipcMain.handle('widget:set-click-through', (_e, e: boolean) => { setWidgetClickThrough(e); return true })
-ipcMain.handle('widget:get-status', () => ({ visible: widgetWindow?.isVisible() ?? false, eventId: currentWidgetEventId }))
+ipcMain.handle('widget:get-status', () => ({ visible: widgetWindow?.isVisible() ?? false, eventId: currentWidgetEventId, clickThrough: widgetClickThrough }))
 ipcMain.handle('widget:close', () => { widgetWindow?.close(); return true })
 ipcMain.handle('widget:resize', (_e, w: number, h: number) => { widgetWindow?.setSize(w, h); return true })
 ipcMain.handle('main:hide-to-tray', () => { mainWindow?.hide(); return true })
+ipcMain.handle('main:minimize', () => { mainWindow?.minimize(); return true })
+ipcMain.handle('main:maximize', () => { if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); return true })
+ipcMain.handle('main:close', () => { mainWindow?.close(); return true })
 ipcMain.handle('app:open-external', (_e, u: string) => { shell.openExternal(u); return true })
 
 // App lifecycle

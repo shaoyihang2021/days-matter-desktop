@@ -45,6 +45,12 @@ export default function App() {
           <button className="btn btn-primary" onClick={() => { setEditingEvent(null); setShowForm(true) }}>
             ＋ 添加事件
           </button>
+          {/* Windows 自绘栏窗口控制 */}
+          <div className="win-controls">
+            <button className="win-btn" title="最小化" onClick={() => window.electronAPI?.minimize()}>—</button>
+            <button className="win-btn" title="最大化" onClick={() => window.electronAPI?.maximize()}>▢</button>
+            <button className="win-btn close" title="关闭" onClick={() => window.electronAPI?.close()}>✕</button>
+          </div>
         </div>
       </header>
 

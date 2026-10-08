@@ -337,3 +337,31 @@
   border-color: var(--accent);
   background: var(--accent-bg);
 }
+
+/* Windows 自绘栏窗口控制（— ▢ ✕）*/
+.win-controls {
+  display: flex;
+  gap: 2px;
+  margin-left: 4px;
+  -webkit-app-region: no-drag;
+}
+.win-btn {
+  width: 30px;
+  height: 22px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: 4px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.win-btn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+.win-btn.close:hover {
+  background: var(--danger);
+  color: white;
+}

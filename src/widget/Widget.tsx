@@ -20,6 +20,15 @@ export default function Widget() {
   const [showSettings, setShowSettings] = useState(false)
   const [clickThrough, setClickThrough] = useState(false)
 
+  // mount 时从主进程同步穿透状态（防止 widget 重开后 UI 状态漂移）
+  useEffect(() => {
+    if (window.electronAPI?.getWidgetStatus) {
+      window.electronAPI.getWidgetStatus().then((s: any) => {
+        if (s?.clickThrough !== undefined) setClickThrough(s.clickThrough)
+      })
+    }
+  }, [])
+
   // 每秒更新时间
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000)
@@ -103,8 +112,7 @@ export default function Widget() {
           {currentEvent.title}
           {events.length > 1 && <span className="cycle-hint"> ↻</span>}
         </div>
-        {!clickThrough && (
-          <div className="widget-controls no-drag">
+        <div className="widget-controls no-drag">
             <button
               className="ctrl-btn"
               onClick={() => setShowSettings(!showSettings)}
@@ -112,10 +120,21 @@ export default function Widget() {
             >
               ⚙️
             </button>
+            {!clickThrough && (
+              <button
+                className="ctrl-btn"
+                onClick={() => setShowSettings(!showSettings)}
+                title="设置"
+              >
+                ⚙️
+              </button>
+            )}
             <button className="ctrl-btn" onClick={handleClose} title="关闭">
               ✕
             </button>
           </div>
+        {clickThrough && (
+          <div className="click-through-hint">🔒 托盘解锁</div>
         )}
       </div>
 

@@ -14,8 +14,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resizeWidget: (width: number, height: number) =>
     ipcRenderer.invoke('widget:resize', width, height),
 
-  // 主窗口
+  // 主窗口（Windows 自绘栏控制）
   hideToTray: () => ipcRenderer.invoke('main:hide-to-tray'),
+  minimize: () => ipcRenderer.invoke('main:minimize'),
+  maximize: () => ipcRenderer.invoke('main:maximize'),
+  close: () => ipcRenderer.invoke('main:close'),
 
   // 工具
   openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),

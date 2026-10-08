@@ -8,6 +8,9 @@ interface ElectronAPI {
   closeWidget: () => Promise<boolean>
   resizeWidget: (width: number, height: number) => Promise<boolean>
   hideToTray: () => Promise<boolean>
+  minimize: () => Promise<boolean>
+  maximize: () => Promise<boolean>
+  close: () => Promise<boolean>
   openExternal: (url: string) => Promise<boolean>
   onWidgetUpdateEvent: (callback: (eventId: string) => void) => void
 }
