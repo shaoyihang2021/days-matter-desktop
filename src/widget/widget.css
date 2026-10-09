@@ -1,45 +1,36 @@
-/* 小组件样式 */
+/* 小组件 — 苹果风，使用主应用主题变量 */
 .widget {
   width: 100%;
   height: 100%;
-  padding: 12px 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(26, 26, 46, 0.92) 0%,
-    rgba(22, 33, 62, 0.92) 100%
-  );
+  padding: 14px 16px 12px;
+  background: var(--bg-window);
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px var(--accent-color, #6C5CE7)33 inset;
-  color: #e8e8f0;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   position: relative;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   overflow: hidden;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s ease;
 }
 
 .widget::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: var(--accent-color, #6C5CE7);
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--accent-color, var(--accent));
   border-radius: 14px 0 0 14px;
 }
 
+/* ===== 头部 ===== */
 .widget-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
-  padding-right: 40px;
+  margin-bottom: 8px;
+  padding-right: 44px;
 }
 
 .drag-area {
@@ -51,14 +42,20 @@
 }
 
 .widget-icon {
-  font-size: 16px;
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent-color, var(--accent)) 18%, transparent);
+  color: var(--accent-color, var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  flex-shrink: 0;
 }
 
 .widget-title {
   flex: 1;
   font-size: 13px;
-  font-weight: 500;
-  color: rgba(232, 232, 240, 0.9);
+  font-weight: 600;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -67,42 +64,43 @@
 
 .cycle-hint {
   font-size: 11px;
-  color: rgba(232, 232, 240, 0.5);
+  color: var(--text-tertiary);
+  margin-left: 4px;
 }
 
 .widget-controls {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 8px; right: 8px;
   display: flex;
-  gap: 2px;
+  gap: 3px;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease;
 }
 
-.widget:hover .widget-controls {
+.widget:hover .widget-controls,
+.widget-controls.visible {
   opacity: 1;
 }
 
 .ctrl-btn {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(232, 232, 240, 0.7);
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  background: var(--bg-app);
+  color: var(--text-secondary);
   font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: all 0.15s;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
 }
 
 .ctrl-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
+/* ===== 主体 ===== */
 .widget-body {
   flex: 1;
   display: flex;
@@ -113,58 +111,61 @@
 .widget-days {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
 }
 
 .days-number {
-  font-size: 48px;
+  font-size: 46px;
   font-weight: 700;
   line-height: 1;
-  background: linear-gradient(135deg, var(--accent-color, #6C5CE7), #A29BFE);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
+  color: var(--accent-color, var(--accent));
+  /* 去掉渐变（旧 AI 风），改成纯色 + 粗细变化 */
 }
 
 .days-label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: rgba(232, 232, 240, 0.55);
+  color: var(--text-secondary);
 }
 
 .widget-meta {
   font-size: 11px;
-  color: rgba(232, 232, 240, 0.45);
+  color: var(--text-tertiary);
   margin-top: 4px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .widget-time {
-  font-size: 12px;
-  font-family: 'SF Mono', 'Menlo', monospace;
-  color: var(--accent-color, #6C5CE7);
-  margin-top: 6px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  color: var(--accent-color, var(--accent));
+  margin-top: 4px;
   opacity: 0.85;
+  letter-spacing: 0.02em;
 }
 
-/* 空状态 */
+/* ===== 空状态 ===== */
 .widget-empty {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(26, 26, 46, 0.9);
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px;
+  background: var(--bg-window);
   border-radius: 14px;
-  color: rgba(232, 232, 240, 0.5);
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
   text-align: center;
 }
 
 .widget-empty-icon {
-  font-size: 36px;
+  width: 32px; height: 32px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
   margin-bottom: 8px;
 }
 
@@ -172,41 +173,97 @@
   font-size: 12px;
 }
 
-/* 小组件内设置 */
+/* ===== 内嵌设置浮层（自绘滑块 + toggle）===== */
 .widget-settings {
   position: absolute;
-  top: 32px;
-  right: 8px;
-  background: rgba(20, 20, 35, 0.95);
+  top: 32px; right: 8px;
+  background: var(--bg-window);
   border-radius: 10px;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-modal);
   z-index: 10;
-  backdrop-filter: blur(10px);
+  min-width: 180px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .setting-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   margin: 6px 0;
   font-size: 12px;
-  color: rgba(232, 232, 240, 0.8);
+  color: var(--text-primary);
 }
 
+/* 自绘滑块（用于透明度等）*/
+.mini-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.mini-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg-window);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s ease;
+}
+
+.mini-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.mini-slider::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+.mini-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg-window);
+}
+
+/* 穿透态提示 */
+.click-through-hint {
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* mini toggle（沿用主应用风格）*/
 .mini-toggle {
   width: 28px;
   height: 16px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--border);
   border-radius: 8px;
   position: relative;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
 }
 
 .mini-toggle.on {
-  background: var(--accent-color, #6C5CE7);
+  background: var(--accent);
 }
 
 .mini-toggle::after {
@@ -218,18 +275,10 @@
   height: 12px;
   background: white;
   border-radius: 50%;
-  transition: left 0.3s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mini-toggle.on::after {
   left: 14px;
-}
-
-.click-through-hint {
-  position: absolute;
-  bottom: 6px;
-  left: 10px;
-  font-size: 10px;
-  color: rgba(232, 232, 240, 0.45);
-  pointer-events: none;  /* 穿透态下也不抢事件 */
 }

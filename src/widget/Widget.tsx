@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { DaysEvent } from '@/types'
 import { getDaysText, formatDate, calculateTimeRemaining } from '@/utils/dateUtils'
+import '@/widget/widget.css'
 
 const EVENTS_KEY = 'days-matter-events'
 
@@ -20,49 +21,32 @@ export default function Widget() {
   const [showSettings, setShowSettings] = useState(false)
   const [clickThrough, setClickThrough] = useState(false)
 
-  // mount 时从主进程同步穿透状态（防止 widget 重开后 UI 状态漂移）
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
   useEffect(() => {
     if (window.electronAPI?.getWidgetStatus) {
       window.electronAPI.getWidgetStatus().then((s: any) => {
         if (s?.clickThrough !== undefined) setClickThrough(s.clickThrough)
       })
     }
-  }, [])
-
-  // 每秒更新时间
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  // 监听主进程的事件更新
-  useEffect(() => {
-    if (window.electronAPI) {
-      window.electronAPI.onWidgetUpdateEvent((eventId: string) => {
-        setCurrentEventId(eventId)
-        // 重新加载事件
+    if (window.electronAPI?.onWidgetUpdateEvent) {
+      window.electronAPI.onWidgetUpdateEvent((_eventId: string) => {
         setEvents(loadEvents())
       })
     }
-
-    // 定时检查事件变化
-    const checkInterval = setInterval(() => {
-      setEvents(loadEvents())
-    }, 5000)
-
+    const checkInterval = setInterval(() => setEvents(loadEvents()), 5000)
     return () => clearInterval(checkInterval)
   }, [])
 
-  // 如果没有指定事件，显示第一个
-  const currentEvent =
-    events.find((e) => e.id === currentEventId) ||
-    events[0] ||
-    null
+  const currentEvent = events.find((e) => e.id === currentEventId) || events[0] || null
 
   if (!currentEvent) {
     return (
       <div className="widget-empty">
-        <div className="widget-empty-icon">⏳</div>
+        <div className="widget-empty-icon">D</div>
         <div className="widget-empty-text">请在主应用中添加事件</div>
       </div>
     )
@@ -86,7 +70,6 @@ export default function Widget() {
     }
   }
 
-  // 切换显示下一个事件
   const cycleEvent = () => {
     if (events.length <= 1) return
     const idx = events.findIndex((e) => e.id === currentEvent.id)
@@ -102,40 +85,25 @@ export default function Widget() {
       className="widget"
       style={{
         opacity: clickThrough ? 0.85 : opacity,
-        '--accent-color': currentEvent.color,
-      } as React.CSSProperties}
+        ['--accent-color' as any]: currentEvent.color,
+      }}
     >
-      {/* 可拖拽区域（通过 CSS -webkit-app-region: drag 实现） */}
       <div className="widget-header drag-area">
-        <span className="widget-icon">{currentEvent.icon || '📅'}</span>
+        <div className="widget-icon">◆</div>
         <div className="widget-title" onClick={cycleEvent} title="点击切换事件">
           {currentEvent.title}
-          {events.length > 1 && <span className="cycle-hint"> ↻</span>}
+          {events.length > 1 && <span className="cycle-hint">↻</span>}
         </div>
-        <div className="widget-controls no-drag">
-            <button
-              className="ctrl-btn"
-              onClick={() => setShowSettings(!showSettings)}
-              title="设置"
-            >
-              ⚙️
+        <div className="widget-controls no-drag" style={{ opacity: showSettings || undefined ? 1 : undefined }}>
+          {!clickThrough && (
+            <button className="ctrl-btn" onClick={() => setShowSettings(!showSettings)} title="设置">
+              ⚙
             </button>
-            {!clickThrough && (
-              <button
-                className="ctrl-btn"
-                onClick={() => setShowSettings(!showSettings)}
-                title="设置"
-              >
-                ⚙️
-              </button>
-            )}
-            <button className="ctrl-btn" onClick={handleClose} title="关闭">
-              ✕
-            </button>
-          </div>
-        {clickThrough && (
-          <div className="click-through-hint">🔒 托盘解锁</div>
-        )}
+          )}
+          <button className="ctrl-btn" onClick={handleClose} title="关闭">
+            ✕
+          </button>
+        </div>
       </div>
 
       <div className="widget-body">
@@ -153,7 +121,6 @@ export default function Widget() {
         )}
       </div>
 
-      {/* 设置弹窗 */}
       {showSettings && !clickThrough && (
         <div className="widget-settings no-drag">
           <div className="setting-row">
@@ -167,14 +134,18 @@ export default function Widget() {
             <span>透明度</span>
             <input
               type="range"
+              className="mini-slider"
               min="40"
               max="100"
               value={Math.round(opacity * 100)}
               onChange={(e) => setOpacity(parseInt(e.target.value) / 100)}
-              style={{ width: 80 }}
             />
           </div>
         </div>
+      )}
+
+      {clickThrough && (
+        <div className="click-through-hint">🔒 托盘解锁</div>
       )}
     </div>
   )
