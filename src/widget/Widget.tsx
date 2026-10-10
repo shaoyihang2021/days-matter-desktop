@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { DaysEvent } from '@/types'
-import { getDaysText, formatDate, calculateTimeRemaining } from '@/utils/dateUtils'
+import { getDaysText, formatDate, getWeekday, calculateTimeRemaining } from '@/utils/dateUtils'
 import '@/widget/widget.css'
 
 const EVENTS_KEY = 'days-matter-events'
+const SETTINGS_KEY = 'days-matter-settings'
 
 function loadEvents(): DaysEvent[] {
   try {
@@ -13,32 +14,42 @@ function loadEvents(): DaysEvent[] {
   return []
 }
 
+/** 跟随主应用的主题设置（light / dark / auto） */
+function applyTheme() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+    document.documentElement.dataset.theme = s.theme || 'auto'
+  } catch {
+    document.documentElement.dataset.theme = 'auto'
+  }
+}
+
 export default function Widget() {
   const [events, setEvents] = useState<DaysEvent[]>(loadEvents())
   const [currentEventId, setCurrentEventId] = useState<string | null>(null)
-  const [now, setNow] = useState(Date.now())
-  const [opacity, setOpacity] = useState(0.92)
-  const [showSettings, setShowSettings] = useState(false)
-  const [clickThrough, setClickThrough] = useState(false)
+  const [, setNow] = useState(Date.now())
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [])
+    applyTheme()
 
-  useEffect(() => {
-    if (window.electronAPI?.getWidgetStatus) {
-      window.electronAPI.getWidgetStatus().then((s: any) => {
-        if (s?.clickThrough !== undefined) setClickThrough(s.clickThrough)
-      })
+    // 每秒刷新（倒计时秒数用）
+    const tick = setInterval(() => setNow(Date.now()), 1000)
+    // 定期同步事件与主题（主窗口改动后自动生效）
+    const sync = () => {
+      setEvents(loadEvents())
+      applyTheme()
     }
+    const poll = setInterval(sync, 3000)
+    window.addEventListener('storage', sync)
+
     if (window.electronAPI?.onWidgetUpdateEvent) {
-      window.electronAPI.onWidgetUpdateEvent((_eventId: string) => {
-        setEvents(loadEvents())
-      })
+      window.electronAPI.onWidgetUpdateEvent(() => sync())
     }
-    const checkInterval = setInterval(() => setEvents(loadEvents()), 5000)
-    return () => clearInterval(checkInterval)
+    return () => {
+      clearInterval(tick)
+      clearInterval(poll)
+      window.removeEventListener('storage', sync)
+    }
   }, [])
 
   const currentEvent = events.find((e) => e.id === currentEventId) || events[0] || null
@@ -56,54 +67,32 @@ export default function Widget() {
   const typeText = currentEvent.type === 'countdown' ? '距离' : '已过'
   const timeRemaining = calculateTimeRemaining(currentEvent)
 
-  const handleToggleClickThrough = async () => {
-    const newValue = !clickThrough
-    setClickThrough(newValue)
-    if (window.electronAPI) {
-      await window.electronAPI.setWidgetClickThrough(newValue)
-    }
-  }
-
   const handleClose = async () => {
-    if (window.electronAPI) {
-      await window.electronAPI.closeWidget()
-    }
+    if (window.electronAPI) await window.electronAPI.closeWidget()
   }
 
+  /** 点击标题切换显示下一个事件 */
   const cycleEvent = () => {
     if (events.length <= 1) return
     const idx = events.findIndex((e) => e.id === currentEvent.id)
     const next = events[(idx + 1) % events.length]
     setCurrentEventId(next.id)
-    if (window.electronAPI) {
-      window.electronAPI.updateWidgetEvent(next.id)
-    }
+    window.electronAPI?.updateWidgetEvent(next.id)
   }
 
   return (
-    <div
-      className="widget"
-      style={{
-        opacity: clickThrough ? 0.85 : opacity,
-        ['--accent-color' as any]: currentEvent.color,
-      }}
-    >
-      <div className="widget-header drag-area">
+    <div className="widget" style={{ ['--accent-color' as any]: currentEvent.color }}>
+      <div className="widget-header">
         <div className="widget-icon">◆</div>
-        <div className="widget-title" onClick={cycleEvent} title="点击切换事件">
+        <div
+          className="widget-title"
+          onClick={cycleEvent}
+          title={events.length > 1 ? '点击切换事件' : currentEvent.title}
+        >
           {currentEvent.title}
           {events.length > 1 && <span className="cycle-hint">↻</span>}
         </div>
-        <div className="widget-controls no-drag" style={{ opacity: showSettings || undefined ? 1 : undefined }}>
-          {!clickThrough && (
-            <button className="ctrl-btn" onClick={() => setShowSettings(!showSettings)} title="设置">
-              ⚙
-            </button>
-          )}
-          <button className="ctrl-btn" onClick={handleClose} title="关闭">
-            ✕
-          </button>
-        </div>
+        <button className="widget-close" onClick={handleClose} title="关闭">✕</button>
       </div>
 
       <div className="widget-body">
@@ -114,39 +103,13 @@ export default function Widget() {
         <div className="widget-meta">
           <span>{typeText}</span>
           <span>{formatDate(currentEvent.date)}</span>
+          <span>{getWeekday(currentEvent.date)}</span>
         </div>
-
         {currentEvent.type === 'countdown' && (
           <div className="widget-time">{timeRemaining}</div>
         )}
+        {currentEvent.note && <div className="widget-note">{currentEvent.note}</div>}
       </div>
-
-      {showSettings && !clickThrough && (
-        <div className="widget-settings no-drag">
-          <div className="setting-row">
-            <span>点击穿透</span>
-            <div
-              className={`mini-toggle ${clickThrough ? 'on' : ''}`}
-              onClick={handleToggleClickThrough}
-            />
-          </div>
-          <div className="setting-row">
-            <span>透明度</span>
-            <input
-              type="range"
-              className="mini-slider"
-              min="40"
-              max="100"
-              value={Math.round(opacity * 100)}
-              onChange={(e) => setOpacity(parseInt(e.target.value) / 100)}
-            />
-          </div>
-        </div>
-      )}
-
-      {clickThrough && (
-        <div className="click-through-hint">🔒 托盘解锁</div>
-      )}
     </div>
   )
 }

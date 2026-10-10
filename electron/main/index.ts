@@ -52,7 +52,7 @@ function createMainWindow() {
 function createWidgetWindow() {
   if (widgetWindow) { widgetWindow.show(); widgetWindow.focus(); return widgetWindow }
   widgetWindow = new BrowserWindow({
-    width: 300, height: 150,  /* 初始尺寸，CSS 内部控 padding */
+    width: 320, height: 170,  /* 初始尺寸，完整展示事件信息 */
     frame: false, transparent: true, alwaysOnTop: true,
     resizable: false, movable: true, hasShadow: false,
     skipTaskbar: true, focusable: true,
@@ -88,20 +88,33 @@ function buildTrayMenu(): Menu {
   ])
 }
 
+// 托盘图标兜底（内嵌 base64 22px PNG，即使打包路径异常也保证托盘图标可见）
+const TRAY_FALLBACK_BLUE = 'iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAABL0lEQVR4nLWVMUvDUBDHf3lGLA5CFQQdxUF0sJ/AxVEQBCe/gi6uTp0cpYObs506SMWPoKMoiBYEcRDBwRbjYjAmDq9isO/eSxrzX96Ru/vdvcuRQEnynBF7SWJ8vu9Zc2WnBMxYQBWCWmIHwXmglhzlChgW7kmOqx1YntF2FMN7CA9dOO1A4wLePoQC/ZmbZ5zS8TWM12HlCJ4CqK/C5TbMTtjzlKnbv/r8gpsX2GzC/SvMTUJjTQjus5wdpxXFcHKr7fUFGB1xdZxDz4E+x3yoVv4R/DPbMIKe9ALzgn0FG4vabnf07AuBfQVL09DagvkpvXa7Z/acTHscJxCE8NiD9h0cnLv32Jcq1g6z3EXW7ygcn8FMSjGU5CgCHQQPCzfkmLciD1yILe3XVJq+AfykYLpYgMZOAAAAAElFTkSuQmCC'
+const TRAY_FALLBACK_WHITE = 'iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAABKElEQVR4nLWVvUoDQRRGz4wrm8aVaBEQCxGEKILBMj6CJFhYmdo++AR5Axt9BStBECxtfAOLhBRiaUBQwUIU16zFsBCz85PZdb9mLsz9zlzu3NmFkiRcCUmSJFqjEFavcdMEnPUAWQRqy82AfaA2j3Ql5IUL00bjDO5HKg4kLISwvgStOnSbsFjRH5D2XNvjSXV24KMHd8ewGkHvFnbP4end7pO6aqc1PwfbNbg8go1leHyF7o0+N2U5K55UIOFgS8XXQ/j+cVTso5VIrV8xvH3+IzjtbRhA1XCB3uB4DFcDFbfrqveFwPEY+s9weAEPL2rsTvftnpnmWAqIQlirQnsTTvbcc2wE51Xmgbg+gz7QP+Ci8Glv5vLywHUe7VT4wE25pf2aStMvZFhhUz7MrbIAAAAASUVORK5CYII='
+
 function loadTrayIcon(): NativeImage {
-  // 优先加载 ico（Windows），fallback png；深色任务栏自动用白色版
+  // Windows 深色任务栏用白色版，浅色任务栏用彩色版
   const isDark = nativeTheme.shouldUseDarkColors
-  const candidates = isDark
-    ? ['resources/icon-white-22.png', 'resources/icon.png', 'resources/icon.ico']
-    : ['resources/icon.ico', 'resources/icon.png', 'resources/icon-22.png']
-  for (const c of candidates) {
-    const p = path.join(__dirname, '../../' + c)
-    try {
-      const img = nativeImage.createFromPath(p)
-      if (!img.isEmpty()) return img
-    } catch {}
+  const names = isDark
+    ? ['icon-white-32.png', 'icon-white-22.png', 'icon.ico', 'icon.png']
+    : ['icon.ico', 'icon-22.png', 'icon.png']
+  // 打包后图标实际位置：<install>/resources/resources/（extraResources 落地处）
+  // 开发时图标位置：<project>/resources/
+  const roots = app.isPackaged
+    ? [path.join(process.resourcesPath, 'resources')]
+    : [path.join(__dirname, '../../resources')]
+  for (const root of roots) {
+    for (const n of names) {
+      try {
+        const img = nativeImage.createFromPath(path.join(root, n))
+        if (!img.isEmpty()) return img
+      } catch {}
+    }
   }
-  return nativeImage.createEmpty()
+  // 兜底：内嵌 base64，保证托盘图标永不缺失
+  return nativeImage.createFromDataURL(
+    'data:image/png;base64,' + (isDark ? TRAY_FALLBACK_WHITE : TRAY_FALLBACK_BLUE)
+  )
 }
 
 function createTray() {

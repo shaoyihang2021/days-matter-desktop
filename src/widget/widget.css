@@ -1,47 +1,75 @@
-/* 小组件 — 完整不透明底色，像 Android 桌面小组件那样 */
+/* 小组件 — 实色卡片（Android 桌面小组件风格）
+   ⚠️ 禁止使用 backdrop-filter！Windows 透明窗口 + backdrop-filter 会导致整卡渲染为全透明（Chromium 已知问题）
+   主题跟随主应用设置（light / dark / auto），通过 <html data-theme> 切换 */
 
+:root,
+[data-theme="light"] {
+  --w-bg: #FFFFFF;
+  --w-text: #1D1D1F;
+  --w-sub: rgba(29, 29, 31, 0.55);
+  --w-border: rgba(0, 0, 0, 0.08);
+  --w-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.16);
+  --w-chip: rgba(0, 0, 0, 0.06);
+  --w-chip-hover: rgba(0, 0, 0, 0.14);
+}
+
+[data-theme="dark"] {
+  --w-bg: #2C2C2E;
+  --w-text: #F2F2F7;
+  --w-sub: rgba(242, 242, 247, 0.55);
+  --w-border: rgba(255, 255, 255, 0.10);
+  --w-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.5);
+  --w-chip: rgba(255, 255, 255, 0.12);
+  --w-chip-hover: rgba(255, 255, 255, 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --w-bg: #2C2C2E;
+    --w-text: #F2F2F7;
+    --w-sub: rgba(242, 242, 247, 0.55);
+    --w-border: rgba(255, 255, 255, 0.10);
+    --w-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.5);
+    --w-chip: rgba(255, 255, 255, 0.12);
+    --w-chip-hover: rgba(255, 255, 255, 0.22);
+  }
+}
+
+html, body, #widget-root {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif; -webkit-font-smoothing: antialiased; }
+
+/* ===== 卡片 ===== */
 .widget {
   width: 100%;
   height: 100%;
-  padding: 14px 16px 12px;
-  /* ↓ 完整不透明底色（磨砂 + 实色 fallback）*/
-  background: rgba(255, 255, 255, 0.82);
-  background-color: #FFFFFF;  /* fallback，磨砂失效时保底 */
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-  backdrop-filter: saturate(180%) blur(24px);
+  padding: 12px 16px;
+  background: var(--w-bg);          /* 实色，绝不全透明 */
   border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 8px 24px rgba(0,0,0,0.12);
-  color: #1D1D1F;
+  border: 1px solid var(--w-border);
+  box-shadow: var(--w-shadow);
+  color: var(--w-text);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  -webkit-app-region: drag;          /* 整卡可拖（安卓小组件手感）*/
+  transition: background 0.25s ease, color 0.25s ease;
+  user-select: none;
 }
 
-/* 深色模式覆盖 */
-@media (prefers-color-scheme: dark) {
-  .widget {
-    background: rgba(44, 44, 46, 0.85);
-    background-color: #2C2C2E;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      0 1px 2px rgba(0,0,0,0.2),
-      0 8px 24px rgba(0,0,0,0.4);
-    color: #F2F2F7;
-  }
-}
-
+/* 左侧彩条 */
 .widget::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
   width: 3px; height: 100%;
-  background: var(--accent-color, #007AFF);
-  border-radius: 16px 0 0 16px;
+  background: var(--accent-color, #0A84FF);
 }
 
 /* ===== 头部 ===== */
@@ -49,22 +77,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
-  padding-right: 48px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
-.drag-area { -webkit-app-region: drag; }
-.no-drag { -webkit-app-region: no-drag; }
-
 .widget-icon {
-  font-size: 14px;
   width: 22px; height: 22px;
   border-radius: 6px;
-  background: var(--accent-color, #007AFF);
-  color: white;
+  background: var(--accent-color, #0A84FF);
+  color: #FFFFFF;
+  font-size: 11px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  font-weight: 600;
 }
 
 .widget-title {
@@ -72,146 +96,104 @@
   font-size: 13px; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   cursor: pointer;
-  color: inherit;
+  -webkit-app-region: no-drag;       /* 可点击切换事件 */
 }
 
 .cycle-hint {
-  font-size: 11px; opacity: 0.5; font-weight: 400;
+  font-size: 11px; opacity: 0.45; font-weight: 400;
+  margin-left: 2px;
 }
 
-/* ===== 窗口控制（穿透时保留关闭按钮）===== */
-.widget-controls {
-  position: absolute;
-  top: 8px; right: 8px;
-  display: flex; gap: 2px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.widget:hover .widget-controls { opacity: 0.7; }
-.widget:hover .widget-controls:hover { opacity: 1; }
-
-.ctrl-btn {
+.widget-close {
+  -webkit-app-region: no-drag;
   width: 20px; height: 20px;
   border-radius: 5px;
-  background: rgba(0,0,0,0.08);
+  background: var(--w-chip);
   color: inherit;
+  border: none;
   font-size: 10px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: background 0.12s;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.12s;
+  flex-shrink: 0;
+  padding: 0;
 }
-.ctrl-btn:hover { background: rgba(0,0,0,0.18); }
+.widget:hover .widget-close { opacity: 0.7; }
+.widget-close:hover { background: var(--w-chip-hover); opacity: 1; }
 
-@media (prefers-color-scheme: dark) {
-  .ctrl-btn { background: rgba(255,255,255,0.12); }
-  .ctrl-btn:hover { background: rgba(255,255,255,0.22); }
+/* ===== 主体（完整展示）===== */
+.widget-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-
-/* ===== 主体 ===== */
-.widget-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
 .widget-days {
-  display: flex; align-items: baseline; gap: 4px;
+  display: flex; align-items: baseline; gap: 5px;
 }
 
 .days-number {
-  font-size: 52px; font-weight: 700;
-  line-height: 1; letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--accent-color, #007AFF), color-mix(in srgb, var(--accent-color, #007AFF) 60%, white));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-@media (prefers-color-scheme: dark) {
-  .days-number {
-    background: linear-gradient(135deg, var(--accent-color, #0A84FF), #409CFF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+  font-size: 46px; font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--accent-color, #0A84FF);
 }
 
 .days-label {
   font-size: 13px; font-weight: 500;
-  opacity: 0.55;
+  color: var(--w-sub);
 }
 
 .widget-meta {
   font-size: 11px;
-  opacity: 0.5;
+  color: var(--w-sub);
   margin-top: 4px;
   display: flex; gap: 8px;
+  white-space: nowrap; overflow: hidden;
 }
 
 .widget-time {
   font-size: 12px;
+  margin-top: 4px;
   font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
-  color: var(--accent-color, #007AFF);
-  margin-top: 6px;
-  opacity: 0.9;
+  color: var(--accent-color, #0A84FF);
 }
 
-/* ===== 空状态 ===== */
+.widget-note {
+  font-size: 11px;
+  color: var(--w-sub);
+  margin-top: 3px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ===== 空状态（同样是实色卡片）===== */
 .widget-empty {
   width: 100%; height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 20px;
-  text-align: center;
-  opacity: 0.7;
-}
-.widget-empty-icon {
-  font-size: 24px; margin-bottom: 6px;
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  background: var(--accent-color, #007AFF);
-  color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
-}
-.widget-empty-text { font-size: 12px; opacity: 0.6; margin-top: 6px; }
-
-/* ===== 设置浮层（穿透关闭）===== */
-.widget-settings {
-  position: absolute;
-  top: 34px; right: 8px;
-  background: rgba(44, 44, 46, 0.96);
-  color: #F2F2F7;
-  border-radius: 10px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  z-index: 10;
-  font-size: 12px;
-}
-@media (prefers-color-scheme: light) {
-  .widget-settings { background: rgba(255,255,255,0.96); color: #1D1D1F; border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-}
-
-.setting-row {
-  display: flex; align-items: center; gap: 10px;
-  margin: 6px 0;
-}
-
-.mini-toggle {
-  width: 28px; height: 16px;
-  background: rgba(0,0,0,0.22);
-  border-radius: 8px;
-  position: relative; cursor: pointer;
-  transition: background 0.2s;
-}
-.mini-toggle.on { background: var(--accent-color, #007AFF); }
-.mini-toggle::after {
-  content: ''; position: absolute; top: 2px; left: 2px;
-  width: 12px; height: 12px; background: white; border-radius: 50%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  transition: left 0.2s;
-}
-.mini-toggle.on::after { left: 14px; }
-
-/* ===== 穿透态提示 ===== */
-.click-through-hint {
-  position: absolute; bottom: 5px; left: 12px;
-  font-size: 10px; opacity: 0.35;
-  pointer-events: none;
+  background: var(--w-bg);
+  border-radius: 16px;
+  border: 1px solid var(--w-border);
+  box-shadow: var(--w-shadow);
+  color: var(--w-text);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  -webkit-app-region: drag;
   user-select: none;
+}
+
+.widget-empty-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: #0A84FF;
+  color: #FFFFFF;
+  font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.widget-empty-text {
+  font-size: 12px;
+  color: var(--w-sub);
 }
