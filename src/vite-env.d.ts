@@ -11,6 +11,9 @@ interface ElectronAPI {
 }
 
 declare global {
+  /** 构建时由 vite define 注入（来自 package.json version） */
+  const __APP_VERSION__: string
+
   interface Window {
     electronAPI?: ElectronAPI
   }

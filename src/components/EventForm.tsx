@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { DaysEvent } from '@/types'
 
 interface Props {
@@ -22,22 +22,39 @@ export default function EventForm({ initialEvent, defaultColor, onSubmit, onCanc
   const [note, setNote] = useState(initialEvent?.note || '')
   const [repeat, setRepeat] = useState<DaysEvent['repeat']>(initialEvent?.repeat || 'none')
 
+  const titleRef = useRef<HTMLInputElement>(null)
+  const openedAt = useRef(Date.now())
+
+  // 弹窗打开后主动聚焦标题框（比 autoFocus 更可靠，无边框窗口下也能拿到焦点）
+  useEffect(() => {
+    titleRef.current?.focus()
+  }, [])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !date) return
+    if (!title.trim() || !date) {
+      titleRef.current?.focus()   // 无效时回焦标题框，给出可感知反馈
+      return
+    }
     onSubmit({ title: title.trim(), date, time: time || undefined, type, color, note: note || undefined, repeat })
   }
 
+  // 打开后 250ms 内忽略遮罩点击（防止双击「添加事件」按钮的第二下误关弹窗）
+  const handleOverlayClick = () => {
+    if (Date.now() - openedAt.current < 250) return
+    onCancel()
+  }
+
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h2>{initialEvent ? '编辑事件' : '添加事件'}</h2>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>标题</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-              placeholder="例如：生日、纪念日" required autoFocus />
+            <input ref={titleRef} type="text" value={title} onChange={e => setTitle(e.target.value)}
+              placeholder="例如：生日、纪念日" required />
           </div>
 
           <div className="form-row">

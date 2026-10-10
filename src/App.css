@@ -194,6 +194,7 @@
   display: flex; align-items: center; justify-content: center;
   z-index: 100;
   animation: fadeIn 0.2s ease;
+  -webkit-app-region: no-drag;   /* 弹窗遮罩绝不参与窗口拖拽区 */
 }
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 
@@ -202,9 +203,12 @@
   border-radius: 14px;
   padding: 22px;
   width: 440px; max-width: 90vw;
+  max-height: calc(100vh - 32px);   /* 小窗口时弹窗不溢出 */
+  overflow-y: auto;
   box-shadow: var(--shadow-modal);
   border: 1px solid var(--border);
   animation: slideUp 0.25s ease;
+  -webkit-app-region: no-drag;      /* 弹窗内容绝不参与窗口拖拽区 */
 }
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px) scale(0.97); }
@@ -249,6 +253,7 @@
   cursor: pointer;
   border: 2px solid transparent;
   transition: transform 0.15s, border-color 0.15s;
+  -webkit-app-region: no-drag;
 }
 .color-swatch:hover { transform: scale(1.1); }
 .color-swatch.active {
@@ -384,6 +389,7 @@
   cursor: pointer;
   transition: background 0.25s ease;
   flex-shrink: 0;
+  -webkit-app-region: no-drag;
 }
 
 .toggle-switch.on { background: var(--accent); }

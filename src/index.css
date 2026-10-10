@@ -115,7 +115,9 @@ body {
 button {
   cursor: pointer; border: none; outline: none; font-family: inherit;
   background: none; color: inherit;
+  -webkit-app-region: no-drag;   /* 无边框窗口：按钮绝不参与拖拽区，防点击被吞 */
 }
 input, select, textarea {
   font-family: inherit; outline: none;
+  -webkit-app-region: no-drag;   /* 无边框窗口：输入控件绝不参与拖拽区，防无法输入 */
 }

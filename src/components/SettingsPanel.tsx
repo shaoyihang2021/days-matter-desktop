@@ -113,7 +113,7 @@ export default function SettingsPanel({ settings, onUpdate }: Props) {
               <h3>关于</h3>
               <p>倒数日 · Days Matter</p>
             </div>
-            <div className="info-text">v0.2.2 · Electron + React</div>
+            <div className="info-text">v{__APP_VERSION__} · Electron + React</div>
           </div>
         </div>
       </section>
