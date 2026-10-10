@@ -52,9 +52,9 @@ function createMainWindow() {
 function createWidgetWindow() {
   if (widgetWindow) { widgetWindow.show(); widgetWindow.focus(); return widgetWindow }
   widgetWindow = new BrowserWindow({
-    width: 260, height: 140, minWidth: 180, minHeight: 100,
+    width: 300, height: 150,  /* 初始尺寸，CSS 内部控 padding */
     frame: false, transparent: true, alwaysOnTop: true,
-    resizable: true, movable: true, hasShadow: false,
+    resizable: false, movable: true, hasShadow: false,
     skipTaskbar: true, focusable: true,
     backgroundColor: '#00000000',
     webPreferences: {
@@ -88,15 +88,29 @@ function buildTrayMenu(): Menu {
   ])
 }
 
+function loadTrayIcon(): NativeImage {
+  // 优先加载 ico（Windows），fallback png；深色任务栏自动用白色版
+  const isDark = nativeTheme.shouldUseDarkColors
+  const candidates = isDark
+    ? ['resources/icon-white-22.png', 'resources/icon.png', 'resources/icon.ico']
+    : ['resources/icon.ico', 'resources/icon.png', 'resources/icon-22.png']
+  for (const c of candidates) {
+    const p = path.join(__dirname, '../../' + c)
+    try {
+      const img = nativeImage.createFromPath(p)
+      if (!img.isEmpty()) return img
+    } catch {}
+  }
+  return nativeImage.createEmpty()
+}
+
 function createTray() {
-  const iconPath = path.join(__dirname, '../../resources/icon.png')
-  let icon: NativeImage
-  try { icon = nativeImage.createFromPath(iconPath); if (icon.isEmpty()) throw new Error() }
-  catch { icon = nativeImage.createEmpty() }
-  tray = new Tray(icon)
+  tray = new Tray(loadTrayIcon())
   tray.setToolTip('倒数日')
   tray.setContextMenu(buildTrayMenu())
   tray.on('click', () => { if (!mainWindow) createMainWindow(); mainWindow?.isVisible() ? mainWindow.hide() : mainWindow?.show() })
+  // 系统深浅色切换时自动换托盘图标
+  nativeTheme.on('updated', () => tray?.setImage(loadTrayIcon()))
 }
 
 function setWidgetClickThrough(enabled: boolean) {

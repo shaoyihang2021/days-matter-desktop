@@ -52,7 +52,8 @@
       "target": [
         "nsis",
         "zip"
-      ]
+      ],
+      "icon": "resources/icon.ico"
     },
     "linux": {
       "target": [
@@ -68,7 +69,14 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "倒数日"
-    }
+    },
+    "icon": "resources/icon.png",
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": "resources/"
+      }
+    ]
   },
   "productName": "倒数日"
 }

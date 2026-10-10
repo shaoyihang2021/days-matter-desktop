@@ -3,9 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Days Matter Widget</title>
+    <title>倒数日小组件</title>
+    <style>
+      /* 底层完全透明，让 .widget div 自己画底色 */
+      html, body { margin:0; padding:0; width:100%; height:100%; background:transparent !important; overflow:hidden; }
+      #widget-root { width:100%; height:100%; background:transparent !important; }
+    </style>
   </head>
-  <body class="widget-body">
+  <body>
     <div id="widget-root"></div>
     <script type="module" src="/src/widget/main.tsx"></script>
   </body>
