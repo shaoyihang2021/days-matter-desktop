@@ -7,21 +7,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('widget:toggle', show, eventId),
   updateWidgetEvent: (eventId: string) =>
     ipcRenderer.invoke('widget:update-event', eventId),
-  setWidgetClickThrough: (enabled: boolean) =>
-    ipcRenderer.invoke('widget:set-click-through', enabled),
-  getWidgetStatus: () => ipcRenderer.invoke('widget:get-status'),
   closeWidget: () => ipcRenderer.invoke('widget:close'),
-  resizeWidget: (width: number, height: number) =>
-    ipcRenderer.invoke('widget:resize', width, height),
 
   // 主窗口（Windows 自绘栏控制）
-  hideToTray: () => ipcRenderer.invoke('main:hide-to-tray'),
   minimize: () => ipcRenderer.invoke('main:minimize'),
   maximize: () => ipcRenderer.invoke('main:maximize'),
   close: () => ipcRenderer.invoke('main:close'),
-
-  // 工具
-  openExternal: (url: string) => ipcRenderer.invoke('app:open-external', url),
 
   // 小组件接收更新
   onWidgetUpdateEvent: (callback: (eventId: string) => void) => {

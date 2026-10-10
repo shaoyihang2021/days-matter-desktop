@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest]  # 仅构建 Windows（如需 mac/linux 加回列表即可）
 
     steps:
       - name: Checkout code

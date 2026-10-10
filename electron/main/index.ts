@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, screen, nativeTheme, shell, type NativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, screen, nativeTheme, type NativeImage } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -139,15 +139,10 @@ ipcMain.handle('widget:toggle', (_e, show: boolean, eventId?: string) => {
   return true
 })
 ipcMain.handle('widget:update-event', (_e, id: string) => { currentWidgetEventId = id; widgetWindow?.webContents.send('widget:update-event', id); return true })
-ipcMain.handle('widget:set-click-through', (_e, e: boolean) => { setWidgetClickThrough(e); return true })
-ipcMain.handle('widget:get-status', () => ({ visible: widgetWindow?.isVisible() ?? false, eventId: currentWidgetEventId, clickThrough: widgetClickThrough }))
 ipcMain.handle('widget:close', () => { widgetWindow?.close(); return true })
-ipcMain.handle('widget:resize', (_e, w: number, h: number) => { widgetWindow?.setSize(w, h); return true })
-ipcMain.handle('main:hide-to-tray', () => { mainWindow?.hide(); return true })
 ipcMain.handle('main:minimize', () => { mainWindow?.minimize(); return true })
 ipcMain.handle('main:maximize', () => { if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); return true })
 ipcMain.handle('main:close', () => { mainWindow?.close(); return true })
-ipcMain.handle('app:open-external', (_e, u: string) => { shell.openExternal(u); return true })
 
 // App lifecycle
 app.whenReady().then(() => {

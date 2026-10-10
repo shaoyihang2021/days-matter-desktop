@@ -37,3 +37,6 @@ Thumbs.db
 # test
 coverage/
 releases/
+
+# trae 本地技能与配置（不进仓库）
+.trae/

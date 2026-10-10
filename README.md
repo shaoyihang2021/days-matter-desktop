@@ -1,11 +1,11 @@
 # Days Matter Desktop ⏳
 
-一款电脑版倒数日应用，支持 **桌面小组件（Desktop Widget）**、多平台（Windows / macOS / Linux）。
+一款电脑版倒数日应用，支持 **桌面小组件（Desktop Widget）**。
 
 > 告别手机里的倒数日 App，把重要的日子直接贴在你的桌面上。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-brightgreen.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-brightgreen.svg)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F.svg?logo=electron)
 ![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react)
 
@@ -13,18 +13,22 @@
 
 ## ✨ 特性
 
-- 🖥️ **桌面小组件** — 无边框、置顶、半透明、可拖拽、点击穿透
+- 🖥️ **桌面小组件** — 无边框、置顶、实色卡片、可拖拽、点击穿透（托盘可锁定/解锁），像 Android 小组件一样完整展示事件信息
+- 🌓 **主题切换** — 浅色 / 深色 / 跟随系统，小组件与主界面同色，不刺眼
+- 🇨🇳 **完整中文界面**
 - 📅 **倒数 & 正值** — 既可以倒数重要日子，也可以记录已过的天数
-- 🎨 **自定义** — 颜色、图标、备注、每年/每月重复
+- 🎨 **自定义** — 颜色、备注、每年/每月重复
 - 🔢 **实时更新** — 每秒更新倒计时（时:分:秒）
-- 🧩 **多事件切换** — 小组件内点击即可循环切换显示的事件
-- 📦 **跨平台** — Windows `.exe` / macOS `.dmg` / Linux `.AppImage`
+- 🧩 **多事件切换** — 小组件内点击标题即可循环切换事件
+- 📦 **Windows 安装包** — NSIS 安装程序，**支持自定义安装路径**
 - 🔧 **系统托盘** — 快速显示/隐藏主窗口与小组件
-- 🌙 **深色主题** — 护眼的深色 UI
 
 ## 📥 下载安装
 
-在 [GitHub Releases](https://github.com/shaoyihang2021/days-matter-desktop/releases) 下载对应平台的安装包。
+在 [GitHub Releases](https://github.com/shaoyihang2021/days-matter-desktop/releases) 下载最新版：
+
+- `Days Matter Desktop Setup X.Y.Z.exe` — 安装版（可自定义安装路径）
+- `Days Matter Desktop-X.Y.Z-win.zip` — 免安装版
 
 ## 🛠️ 开发
 
@@ -42,24 +46,23 @@ npm install
 # 开发模式（同时启动 Vite + Electron）
 npm run dev
 
-# 构建生产版本（当前平台）
-npm run build
+# 编译（渲染进程 + 主进程）
+npm run build:app
 
-# 打包安装程序
+# 打包 Windows 安装程序 → release/
 npm run electron:build
 ```
 
-### 跨平台构建
+### 发布
 
-通过 GitHub Actions 自动构建，支持三大平台：
+打 tag 即触发 GitHub Actions 自动构建并创建 Release：
 
 ```bash
-# 打 tag 触发发布
-git tag v0.1.0
-git push origin v0.1.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
-CI 将自动构建 Windows、macOS、Linux 安装包并创建 GitHub Release。
+详细构建与发布说明见 [docs/BUILD_AND_RELEASE.md](./docs/BUILD_AND_RELEASE.md)。
 
 ## 📁 项目结构
 
@@ -74,12 +77,14 @@ days-matter-desktop/
 │   ├── widget/              # 桌面小组件 UI
 │   ├── hooks/               # React hooks
 │   ├── types/               # TypeScript 类型
-│   ├── utils/               # 工具函数（日期计算、存储）
+│   ├── utils/               # 工具函数（日期计算）
 │   └── main.tsx             # React 入口
+├── resources/               # 图标资源（打包进 extraResources）
+├── scripts/                 # 工具脚本（download-release.sh）
+├── docs/                    # 文档与实现计划存档
 ├── index.html               # 主应用 HTML
 ├── widget.html              # 小组件 HTML
-├── vite.config.ts           # Vite 多页面配置
-└── .github/workflows/       # CI/CD
+└── .github/workflows/       # CI/CD（Windows 构建 + Release）
 ```
 
 ## 🏗️ 架构
@@ -94,7 +99,7 @@ days-matter-desktop/
            ▼                                    ▼
 ┌─────────────────────┐              ┌──────────────────────┐
 │   DaysEvent Store   │              │  Widget Window       │
-│   (事件持久化)       │              │  (无边框/置顶/透明)    │
+│   (事件持久化)       │              │  (无边框/置顶/可拖拽)   │
 └─────────────────────┘              └──────────────────────┘
 ```
 

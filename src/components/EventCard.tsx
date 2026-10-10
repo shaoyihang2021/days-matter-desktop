@@ -1,5 +1,5 @@
 import { DaysEvent } from '@/types'
-import { getDaysText, formatDate, getWeekday, calculateDays } from '@/utils/dateUtils'
+import { getDaysText, formatDate, getWeekday } from '@/utils/dateUtils'
 
 interface Props {
   event: DaysEvent
